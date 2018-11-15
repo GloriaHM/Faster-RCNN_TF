@@ -49,19 +49,30 @@ def testcase2():
     data = tf.placeholder(name = 'data', shape = (None, None, None, 1), dtype=tf.float32)
     rois = tf.placeholder(name = 'rois', shape = (None, 5), dtype = tf.float32 )
 
-    [y, argmax] = roi_pooling_op.roi_pool(data, rois, 6, 6, 1.0/3)
+    [y, argmax] = roi_pooling_op.roi_pool(data, rois, 6, 6, 1.0)
 
     init = tf.initialize_all_variables()
 
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
     sess.run(init)
-    pdb.set_trace()
     for step in xrange(1):
-        randomInput = np.random.rand(32, 100, 100, 1)
 
-        res = sess.run( [y], feed_dict = {data : randomInput, rois : [[0, 10, 10, 20, 20], [31, 30, 30, 40, 40]] } )
+        img = np.zeros( (100 ,100) )
+        for i in range(100):
+            for j in range(100):
+                img[i][j] = ( i/10 ) * 10 + j/10;
 
-        print( res[0] )
+        #this is a block matirx composed of 10x10 blocks from 0 .. 100
+        randomInput = np.tile( np.expand_dims(img, 2), (32, 1, 1, 1) )
+
+        res = sess.run( y,
+                feed_dict = {
+                    data : randomInput,
+                    rois : [[0, 10, 10, 15, 15], [31, 30, 30, 35, 35]]
+                    } )
+
+        assert(np.all(res[0] == 11))
+        assert(np.all(res[1] == 33))
 
 
 #with tf.device('/gpu:0'):
@@ -70,7 +81,9 @@ def testcase2():
 #with tf.device('/cpu:0'):
 #  run(init)
 
+tf.reset_default_graph()
 testcase1()
+
 tf.reset_default_graph()
 testcase2()
 
