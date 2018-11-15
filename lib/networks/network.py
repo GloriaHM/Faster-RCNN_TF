@@ -149,6 +149,9 @@ class Network(object):
             input[1] = input[1][0]
 
         print input
+        #input[0] : Nbatch x h x w x C
+        #input[1] : NROI x 5
+        #output NROI x 7 x 7 x C
         return roi_pool_op.roi_pool(input[0], input[1],
                                     pooled_height,
                                     pooled_width,
