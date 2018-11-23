@@ -67,9 +67,9 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    while not os.path.exists(args.model) and args.wait:
-        print('Waiting for {} to exist...'.format(args.model))
-        time.sleep(10)
+#    while not os.path.exists(args.model) and args.wait:
+#        print('Waiting for {} to exist...'.format(args.model))
+#        time.sleep(10)
 
     weights_filename = os.path.splitext(os.path.basename(args.model))[0]
 
@@ -82,15 +82,16 @@ if __name__ == '__main__':
     network = get_network(args.network_name)
     print 'Use network `{:s}` in training'.format(args.network_name)
 
-    if args.device == 'gpu':
-        cfg.USE_GPU_NMS = True
-        cfg.GPU_ID = args.device_id
-    else:
-        cfg.USE_GPU_NMS = False
+#    if args.device == 'gpu':
+#        cfg.USE_GPU_NMS = True
+#        cfg.GPU_ID = args.device_id
+#    else:
+    cfg.USE_GPU_NMS = False
 
     # start a session
     saver = tf.train.Saver()
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+    saver = tf.train.import_meta_graph(args.model+'.meta')
     saver.restore(sess, args.model)
     print ('Loading model weights from {:s}').format(args.model)
 
