@@ -55,8 +55,6 @@ class Test_dataset(unittest.TestCase):
         all_boxes[1][0] = np.expand_dims( sample_box, 0 )
 
         imdb._write_voc_results_file( all_boxes )
-        import pdb
-        pdb.set_trace()
         # when evaluating for class i
         # for a image j
         # read gt class i in image j -> gt_boxes
