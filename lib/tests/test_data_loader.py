@@ -32,11 +32,17 @@ class Test_data_loader(unittest.TestCase):
                 loader._roidb[0]['gt_overlaps'].todense() ) )
 
     def test_get_minibatch(self):
+        from fast_rcnn.config import cfg
+        cfg.TRAIN.HAS_RPN = True
+        cfg.TRAIN.IMS_PER_BATCH = 1
+
+        imdb = self.imdb
+        loader = ROIDataLoader()
         loader.preprocess_train(imdb)
         loader.init_sampler(imdb.num_classes)
         blobs = loader.get_next_batch()
-        import pdb
-        pdb.set_trace()
+        print "blobs has the following keys"
+        print blobs.keys()
 
 
 
