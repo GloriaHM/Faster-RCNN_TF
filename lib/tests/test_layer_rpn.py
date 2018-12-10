@@ -52,11 +52,28 @@ class Test_layer_rpn(unittest.TestCase):
         assert(np.array_equal(iw, rpn_bbox_inside_weights_ref) )
         assert(np.array_equal(ow, rpn_bbox_outside_weights_ref) )
 
+    def test_rpn_cls_score_reshpae(self):
+        tf.reset_default_graph()
+        with open(self.datadir+'test_rpn_cls_reshape.pkl', 'rb') as fid:
+            df = pickle.load(fid)
+        rpn_cls_score = df['input']
+        res_ref = df['output']
+
+        rpn = RPN(DEBUG = True)
+        input_tensor = tf.placeholder( dtype = tf.float32, shape = (None, None, None, None) )
+        rpn_cls_prob_reshape = rpn._rpn_cls_score_reshape(input_tensor)
+
+        with tf.Session() as sess:
+            res = sess.run(rpn_cls_prob_reshape, feed_dict = {input_tensor:rpn_cls_score})
+
+        assert( np.equal(res, res_ref).all() )
+
 
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(Test_layer_rpn('test_rpn_anchor_target_layer'))
+    #suite.addTest(Test_layer_rpn('test_rpn_anchor_target_layer'))
+    suite.addTest(Test_layer_rpn('test_rpn_cls_score_reshpae'))
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
 

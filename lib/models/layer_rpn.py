@@ -307,6 +307,34 @@ class RPN(object):
         '''
         pass
 
+
+    def _rpn_cls_score_reshape(self, rpn_cls_score):
+        ''' apply softmax for rpn_cls_score
+        input: rpn_cls_score - 1,h,w,2xNanchor
+        output: rpn_cls_prob_reshape -  1,h,w,2xNanchor
+        '''
+        batch = tf.shape(rpn_cls_score)[0]
+        h = tf.shape(rpn_cls_score)[1]
+        w = tf.shape(rpn_cls_score)[2]
+        Nanchor2 = tf.shape(rpn_cls_score)[3]
+
+        #reshape input into [1, 9h, w, 2]
+        d = 2
+        reshape1 = tf.transpose(
+                tf.reshape( tf.transpose(rpn_cls_score,[0,3,1,2]) , [batch, d, h*Nanchor2/d, w] ),
+                [0,2,3,1]
+                )
+
+        #softmax across last dim [1, 9h, w, 2]
+        reshape2 = tf.nn.softmax(reshape1, axis = -1)
+
+        #reshape into cls prob of shape 1, h, w, 2xNanchor
+        rpn_cls_prob_reshape = tf.transpose(
+                tf.reshape(tf.transpose(reshape2,[0,3,1,2]), [batch, Nanchor2, h, w]),
+                [0,2,3,1],name='rpn_cls_prob_reshape')
+
+        return rpn_cls_prob_reshape
+
     def proposal_layer(self):
         '''
         input:
