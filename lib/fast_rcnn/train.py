@@ -50,8 +50,8 @@ class SolverWrapper(object):
         if cfg.TRAIN.BBOX_REG and net.layers.has_key('bbox_pred'):
             # save original values
             with tf.variable_scope('bbox_pred', reuse=True):
-                weights = tf.get_variable("weights")
-                biases = tf.get_variable("biases")
+                weights = tf.get_variable("kernel")
+                biases = tf.get_variable("bias")
 
             orig_0 = weights.eval()
             orig_1 = biases.eval()
@@ -137,6 +137,49 @@ class SolverWrapper(object):
             self.net.load(self.pretrained_model, sess, self.saver, True)
 
         last_snapshot_iter = -1
+
+        ## initialize weights for last few layers
+        import pdb
+        pdb.set_trace()
+        import pickle
+
+        datadir = 'lib/tests/test_layer_frcnn_data/'
+        with open(datadir+'test_all.pkl', 'rb')  as fid:
+            df = pickle.load( fid )
+        reshapein , rpn_rois , gt, \
+        cls_prob_res,bbox_pred_res, \
+        w0, b0, w1, b1, w2, b2, w3, b3 = df
+
+        sess.run(tf.assign(
+                tf.get_default_graph().get_tensor_by_name('fc6/kernel:0'), w0
+                ) )
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('fc6/bias:0'), b0
+            ) )
+
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('fc7/kernel:0'), w1
+            ) )
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('fc7/bias:0'), b1
+            ) )
+
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('cls_score/kernel:0'), w2
+            ))
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('cls_score/bias:0'), b2
+            ))
+
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('bbox_pred/kernel:0'), w3
+            ))
+        sess.run(tf.assign(
+            tf.get_default_graph().get_tensor_by_name('bbox_pred/bias:0'), b3
+            ))
+
+
+
         timer = Timer()
         for iter in range(max_iters):
             # get one batch

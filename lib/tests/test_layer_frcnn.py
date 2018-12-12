@@ -148,7 +148,7 @@ if __name__ == "__main__":
     suite.addTest(Test_layer_rpn('test_frcnn_proposal_target'))
     #suite.addTest(Test_layer_rpn('test_frcnn_roi_pooling'))
     suite.addTest(Test_layer_rpn('test_frcnn_head'))
-    suite.addTest(Test_layer_rpn('test_frcnn_all'))
+    #suite.addTest(Test_layer_rpn('test_frcnn_all'))
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
 
