@@ -11,6 +11,7 @@ __sets = {}
 
 import networks.VGGnet_train
 import networks.VGGnet_test
+import networks.VGGnet_train_wrapper
 import pdb
 import tensorflow as tf
 
@@ -27,7 +28,8 @@ def get_network(name):
     if name.split('_')[1] == 'test':
        return networks.VGGnet_test()
     elif name.split('_')[1] == 'train':
-       return networks.VGGnet_train()
+       #return networks.VGGnet_train()
+       return networks.VGGnet_train_wrapper.VGGnet_train_wrapper()
     else:
        raise KeyError('Unknown dataset: {}'.format(name))
     

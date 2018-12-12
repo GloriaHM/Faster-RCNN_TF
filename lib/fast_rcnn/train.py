@@ -107,35 +107,17 @@ class SolverWrapper(object):
 
         # RPN
         # classification loss
-        rpn_cls_score = tf.reshape(self.net.get_output('rpn_cls_score_reshape'),[-1,2])
-        rpn_label = tf.reshape(self.net.get_output('rpn-data')[0],[-1])
-        rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score,tf.where(tf.not_equal(rpn_label,-1))),[-1,2])
-        rpn_label = tf.reshape(tf.gather(rpn_label,tf.where(tf.not_equal(rpn_label,-1))),[-1])
-        rpn_cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
+        rpn_cross_entropy = self.net.get_output('rpn_cross_entropy')
 
         # bounding box regression L1 loss
-        rpn_bbox_pred = self.net.get_output('rpn_bbox_pred')
-        rpn_bbox_targets = tf.transpose(self.net.get_output('rpn-data')[1],[0,2,3,1])
-        rpn_bbox_inside_weights = tf.transpose(self.net.get_output('rpn-data')[2],[0,2,3,1])
-        rpn_bbox_outside_weights = tf.transpose(self.net.get_output('rpn-data')[3],[0,2,3,1])
+        rpn_loss_box = self.net.get_output('rpn_loss_box')
 
-        rpn_smooth_l1 = self._modified_smooth_l1(3.0, rpn_bbox_pred, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights)
-        rpn_loss_box = tf.reduce_mean(tf.reduce_sum(rpn_smooth_l1, reduction_indices=[1, 2, 3]))
- 
         # R-CNN
         # classification loss
-        cls_score = self.net.get_output('cls_score')
-        label = tf.reshape(self.net.get_output('roi-data')[1],[-1])
-        cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score, labels=label))
+        cross_entropy = self.net.get_output('cross_entropy')
 
         # bounding box regression L1 loss
-        bbox_pred = self.net.get_output('bbox_pred')
-        bbox_targets = self.net.get_output('roi-data')[2]
-        bbox_inside_weights = self.net.get_output('roi-data')[3]
-        bbox_outside_weights = self.net.get_output('roi-data')[4]
-
-        smooth_l1 = self._modified_smooth_l1(1.0, bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights)
-        loss_box = tf.reduce_mean(tf.reduce_sum(smooth_l1, reduction_indices=[1]))
+        loss_box = self.net.get_output('loss_box')
 
         # final loss
         loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
@@ -171,6 +153,37 @@ class SolverWrapper(object):
                 run_metadata = tf.RunMetadata()
 
             timer.tic()
+
+            #import pdb
+            #pdb.set_trace()
+            #import pickle
+
+            #reshapein = self.net.get_output('conv5_3')
+            #rois = self.net.get_output('rpn_rois')
+            #gt = self.net.gt_boxes
+            #w0 = tf.get_default_graph().get_tensor_by_name('fc6/weights:0')
+            #b0 = tf.get_default_graph().get_tensor_by_name('fc6/biases:0')
+
+            #w1 = tf.get_default_graph().get_tensor_by_name('fc7/weights:0')
+            #b1 = tf.get_default_graph().get_tensor_by_name('fc7/biases:0')
+
+            #w2 = tf.get_default_graph().get_tensor_by_name('cls_score/weights:0')
+            #b2 = tf.get_default_graph().get_tensor_by_name('cls_score/biases:0')
+
+            #w3 = tf.get_default_graph().get_tensor_by_name('bbox_pred/weights:0')
+            #b3 = tf.get_default_graph().get_tensor_by_name('bbox_pred/biases:0')
+
+
+            #cls_prob = self.net.get_output('cls_prob')
+            #bbox_pred = self.net.get_output('bbox_pred')
+
+            #res = sess.run([reshapein,rois,gt,
+            #    cls_prob,bbox_pred,
+            #    w0, b0, w1, b1, w2, b2, w3, b3
+            #    ], feed_dict=feed_dict, options=run_options, run_metadata=run_metadata)
+            #pickle.dump( res , open('lib/tests/test_layer_frcnn_data/test_all.pkl', 'wb') )
+
+            #pdb.set_trace()
 
             rpn_loss_cls_value, rpn_loss_box_value,loss_cls_value, loss_box_value, _ = sess.run([rpn_cross_entropy, rpn_loss_box, cross_entropy, loss_box, train_op],
                                                                                                 feed_dict=feed_dict,
