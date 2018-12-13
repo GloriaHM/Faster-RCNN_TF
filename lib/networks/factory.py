@@ -26,7 +26,8 @@ def get_network(name):
     #    raise KeyError('Unknown dataset: {}'.format(name))
     #return __sets[name]
     if name.split('_')[1] == 'test':
-       return networks.VGGnet_test()
+       #return networks.VGGnet_test()
+       return networks.VGGnet_train_wrapper.VGGnet_train_wrapper(trainable = False)
     elif name.split('_')[1] == 'train':
        #return networks.VGGnet_train()
        return networks.VGGnet_train_wrapper.VGGnet_train_wrapper()

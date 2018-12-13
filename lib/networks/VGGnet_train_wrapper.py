@@ -48,7 +48,7 @@ class VGGnet_train_wrapper(object):
         cls_prob,bbox_pred, cross_entropy,loss_box
 
         '''
-        isTrain = True
+        isTrain = self.trainable
 
         #VGG backend
         self.vggbk = VGG16BackBone(self.data)
@@ -80,6 +80,9 @@ class VGGnet_train_wrapper(object):
         self.outputs['loss_box'] = loss_box
         self.outputs['rpn_cross_entropy'] = rpn_cross_entro
         self.outputs['rpn_loss_box'] = rpn_loss_box
+
+        self.outputs['rois'] = rpn_rois
+        self.outputs['cls_score'] = tf.get_default_graph().get_tensor_by_name( 'cls_score/BiasAdd:0' )
 
 
     def get_output(self, key):
