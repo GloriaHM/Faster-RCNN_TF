@@ -141,7 +141,19 @@ class Test_layer_rpn(unittest.TestCase):
         assert( np.equal(cls_prob_res, cls_prob_r).all() )
         assert( np.equal(bbox_pred_res, bbox_pred_r).all() )
 
+    def test_frcnn_testmode(self):
+        tf.reset_default_graph()
 
+        reshapein = tf.placeholder(dtype = tf.float32, shape = (None, None, None, 512))
+        rpn_rois = tf.placeholder( dtype = tf.float32, shape = ( None, 5 )  )
+
+        frcnn = FRCNN( DEBUG = True)
+        model = frcnn.create(
+                reshapein, rpn_rois,
+                num_classes = 21,
+                isTrain = False
+                )
+        cls_prob, bbox_pred, cross_entropy, loss_box = model.get_outputs()
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
@@ -149,6 +161,7 @@ if __name__ == "__main__":
     #suite.addTest(Test_layer_rpn('test_frcnn_roi_pooling'))
     suite.addTest(Test_layer_rpn('test_frcnn_head'))
     #suite.addTest(Test_layer_rpn('test_frcnn_all'))
+    suite.addTest(Test_layer_rpn('test_frcnn_testmode'))
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
 

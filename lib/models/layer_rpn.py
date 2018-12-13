@@ -66,17 +66,21 @@ class RPN(object):
             )
 
         #training specific
-        rpn_labels,rpn_bbox_targets,rpn_bbox_iw,rpn_bbox_ow = \
+        if isTrain:
+            rpn_labels,rpn_bbox_targets,rpn_bbox_iw,rpn_bbox_ow = \
                 self.rpn_anchor_target_layer( tf.shape(features),
                 gt_boxes,
                 im_info,
                 _feat_stride,
                 anchor_scales, "rpn_anchor_target_layer")
 
-        self.rpn_cross_entropy, self.rpn_loss_box = \
+            self.rpn_cross_entropy, self.rpn_loss_box = \
                 self.rpn_loss(
                 rpn_cls_score_reshape, rpn_bbox_pred,
                 rpn_labels, rpn_bbox_targets, rpn_bbox_iw, rpn_bbox_ow)
+        else:
+            self.rpn_cross_entropy = None
+            self.rpn_loss_box = None
 
         return self
 

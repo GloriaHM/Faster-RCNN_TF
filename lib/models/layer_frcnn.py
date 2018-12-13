@@ -19,8 +19,10 @@ class FRCNN(object):
 
         return  self.cls_prob, self.bbox_pred, self.cross_entropy, self.loss_box
 
-    def create(self,features, rpn_rois, gt_boxes,
-            num_classes, isTrain = False):
+    def create(self,features, rpn_rois,
+            gt_boxes = None,
+            num_classes = 21,
+            isTrain = False):
         '''
         input:
             features : Nbatch , h, w, Nchannel
@@ -54,8 +56,11 @@ class FRCNN(object):
 
         '''
 
-        rois, labels, bbox_targets, bbox_inside_weights, bbox_outside_weights = \
+        if isTrain:
+            rois, labels, bbox_targets, bbox_inside_weights, bbox_outside_weights = \
             self.frcnn_proposal_target( rpn_rois, gt_boxes,  num_classes )
+        else:
+            rois = rpn_rois
 
         pool_5 = self.frcnn_roi_pooling(features, rois, pooled_height = 7, pooled_width = 7, \
             spatial_scale = 1./16, name = "pool_5")
@@ -63,9 +68,14 @@ class FRCNN(object):
         cls_score, self.cls_prob, self.bbox_pred = \
                 self.frcnn_head(pool_5, num_classes, isTrain=isTrain)
 
-        self.cross_entropy, self.loss_box = \
+        if isTrain:
+            self.cross_entropy, self.loss_box = \
                 self.frcnn_loss( cls_score, self.bbox_pred,
                 labels ,bbox_targets,bbox_inside_weights,bbox_outside_weights  )
+
+        else:
+            self.cross_entropy = None
+            self.loss_box = None
 
         return self
 

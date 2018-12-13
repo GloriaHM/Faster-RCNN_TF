@@ -218,6 +218,16 @@ class Test_layer_rpn(unittest.TestCase):
         assert( np.equal(cross_entro_r, rpn_cross_entropy_ref).all() )
         assert( np.equal(bbox_loss_r, rpn_loss_box_ref).all() )
 
+    def test_rpn_testmode(self):
+        tf.reset_default_graph()
+        input_tensor = tf.placeholder(dtype = tf.float32, shape = (None, None, None, 512))
+        im_info_tensor= tf.placeholder( dtype = tf.float32, shape = [None,None] )
+
+        rpn = RPN(DEBUG = True).create( input_tensor, im_info_tensor,
+                isTrain = False )
+
+        proposals, rpn_cross_entropy, rpn_loss_box = rpn.get_outputs()
+
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
@@ -229,6 +239,7 @@ if __name__ == "__main__":
     suite.addTest(Test_layer_rpn('test_proposal_layer'))
     suite.addTest(Test_layer_rpn('test_create'))
     suite.addTest(Test_layer_rpn('test_all'))
+    suite.addTest(Test_layer_rpn('test_rpn_testmode'))
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
 
