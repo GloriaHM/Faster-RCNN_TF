@@ -155,6 +155,17 @@ class Test_layer_rpn(unittest.TestCase):
                 )
         cls_prob, bbox_pred, cross_entropy, loss_box = model.get_outputs()
 
+    def test_restore_params(self):
+        tf.reset_default_graph()
+        frcnn = FRCNN( DEBUG = True)
+        input_ph = tf.placeholder( dtype = tf.float32, shape = [256, 7, 7 ,512 ] )
+        frcnn.frcnn_head( input_ph, num_classes = 21, isTrain = True )
+
+        weights = os.path.join('../data/pretrain_model', 'vgg16_weights.npz')
+        with tf.Session() as sess:
+            frcnn.restore_params(sess, weights)
+
+
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     suite.addTest(Test_layer_rpn('test_frcnn_proposal_target'))
@@ -162,6 +173,7 @@ if __name__ == "__main__":
     suite.addTest(Test_layer_rpn('test_frcnn_head'))
     #suite.addTest(Test_layer_rpn('test_frcnn_all'))
     suite.addTest(Test_layer_rpn('test_frcnn_testmode'))
+    suite.addTest(Test_layer_rpn('test_restore_params'))
 
     unittest.TextTestRunner(verbosity = 2).run(suite)
 

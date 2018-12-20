@@ -63,14 +63,14 @@ class VGGnet_train_wrapper(object):
                         isTrain = isTrain
                         ).get_outputs()
         #FRCNN
-        cls_prob, bbox_pred, cross_entropy, loss_box = \
-                FRCNN().create(
+        frcnn = FRCNN().create(
                         conv5_3,
                         rpn_rois,
                         self.gt_boxes,
                         num_classes = n_classes,
                         isTrain = isTrain
-                        ).get_outputs()
+                        )
+        cls_prob, bbox_pred, cross_entropy, loss_box = frcnn.get_outputs()
 
 
         self.outputs = {}
@@ -99,4 +99,5 @@ class VGGnet_train_wrapper(object):
             saver.restore(session, data_path)
         else:
             self.vggbk.restore_params(session, data_path)
+            self.frcnn.restore_params(session, data_path)
 

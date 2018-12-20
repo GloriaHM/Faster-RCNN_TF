@@ -301,9 +301,15 @@ class FRCNN(object):
         dp7 = tf.layers.dropout( fc7, rate = rate, \
                 training = isTrain , name = 'drop7')
 
-        cls_score = tf.layers.dense( dp7, num_classes, activation = None, name = 'cls_score' )
-        cls_prob = tf.nn.softmax( cls_score, name = 'cls_prob' )
-        bbox_pred = tf.layers.dense(dp7, 4*num_classes, activation = None, name = 'bbox_pred')
+        cls_score = tf.layers.dense( dp7, num_classes, activation = None,
+                name = 'cls_score' ,
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01)
+                )
+        cls_prob = tf.nn.softmax( cls_score, name = 'cls_prob')
+        bbox_pred = tf.layers.dense(dp7, 4*num_classes, activation = None,
+                name = 'bbox_pred',
+                kernel_initializer =  tf.truncated_normal_initializer(0.0, stddev=0.001)
+                )
 
         return cls_score, cls_prob, bbox_pred
 
@@ -342,4 +348,21 @@ class FRCNN(object):
 
         return cross_entropy, loss_box
 
+    def restore_params(self, session, weights):
+        npz = np.load(weights)
+
+        with tf.Session() as sess:
+            sess.run(tf.assign(
+                tf.get_default_graph().get_tensor_by_name('fc6/kernel:0'), npz['fc6_W']
+                ) )
+            sess.run(tf.assign(
+                tf.get_default_graph().get_tensor_by_name('fc6/bias:0'), npz['fc6_b']
+                ) )
+
+            sess.run(tf.assign(
+                tf.get_default_graph().get_tensor_by_name('fc7/kernel:0'), npz['fc7_W']
+                ) )
+            sess.run(tf.assign(
+                tf.get_default_graph().get_tensor_by_name('fc7/bias:0'), npz['fc7_b']
+                ) )
 
