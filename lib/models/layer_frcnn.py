@@ -293,11 +293,13 @@ class FRCNN(object):
                     tf.transpose(pooled_feature,[0,3,1,2]), [-1, dim])
 
         fc6  = tf.layers.dense( pooled_feature_reshape, \
-                4096, activation = tf.nn.relu, name = 'fc6' )
+                4096, activation = tf.nn.relu, name = 'fc6',
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01))
         rate = 0 if self.DEBUG else 0.5
         dp6 = tf.layers.dropout( fc6, rate = rate, \
                 training = isTrain , name = 'drop6')
-        fc7  =  tf.layers.dense( dp6, 4096, activation = tf.nn.relu, name = 'fc7' )
+        fc7  =  tf.layers.dense( dp6, 4096, activation = tf.nn.relu, name = 'fc7',
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01))
         dp7 = tf.layers.dropout( fc7, rate = rate, \
                 training = isTrain , name = 'drop7')
 

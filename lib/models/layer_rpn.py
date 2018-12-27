@@ -98,17 +98,21 @@ class RPN(object):
                 features,
                 nfilters,
                 kernel_size = 3,
-                padding = 'SAME', activation = tf.nn.relu, name = 'rpn_conv/3x3')
+                padding = 'SAME', activation = tf.nn.relu, name = 'rpn_conv/3x3',
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01),
+                )
 
         rpn_cls_score = tf.layers.conv2d(
                 rpn_conv33,
                 2*nscales*nratios,
-                kernel_size = 1, padding = 'VALID', name = 'rpn_cls_score' )
+                kernel_size = 1, padding = 'VALID', name = 'rpn_cls_score',
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01),)
 
         rpn_bbox_pred =  tf.layers.conv2d(
                 rpn_conv33,
                 4*nscales*nratios,
-                kernel_size = 1, padding = 'VALID', name = 'rpn_bbox_pred' )
+                kernel_size = 1, padding = 'VALID', name = 'rpn_bbox_pred',
+                kernel_initializer = tf.truncated_normal_initializer(0.0, stddev=0.01),)
 
         return rpn_cls_score, rpn_bbox_pred
 
