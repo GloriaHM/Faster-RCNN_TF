@@ -19,8 +19,6 @@ import pprint
 import numpy as np
 import sys
 import pdb
-import turibolt as bolt
-import os
 
 def parse_args():
     """
