@@ -119,6 +119,35 @@ class SolverWrapper(object):
         # bounding box regression L1 loss
         loss_box = self.net.get_output('loss_box')
 
+        #else:
+        #    rpn_cls_score = tf.reshape(self.net.get_output('rpn_cls_score_reshape'),[-1,2])
+        #    rpn_label = tf.reshape(self.net.get_output('rpn-data')[0],[-1])
+        #    rpn_cls_score = tf.reshape(tf.gather(rpn_cls_score,tf.where(tf.not_equal(rpn_label,-1))),[-1,2])
+        #    rpn_label = tf.reshape(tf.gather(rpn_label,tf.where(tf.not_equal(rpn_label,-1))),[-1])
+        #    rpn_cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=rpn_cls_score, labels=rpn_label))
+
+
+        #    rpn_bbox_pred = self.net.get_output('rpn_bbox_pred')
+        #    rpn_bbox_targets = tf.transpose(self.net.get_output('rpn-data')[1],[0,2,3,1])
+        #    rpn_bbox_inside_weights = tf.transpose(self.net.get_output('rpn-data')[2],[0,2,3,1])
+        #    rpn_bbox_outside_weights = tf.transpose(self.net.get_output('rpn-data')[3],[0,2,3,1])
+
+        #    rpn_smooth_l1 = self._modified_smooth_l1(3.0, rpn_bbox_pred, rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights)
+        #    rpn_loss_box = tf.reduce_mean(tf.reduce_sum(rpn_smooth_l1, reduction_indices=[1, 2, 3]))
+
+        #    cls_score = self.net.get_output('cls_score')
+        #    label = tf.reshape(self.net.get_output('roi-data')[1],[-1])
+        #    cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=cls_score, labels=label))
+
+        #    bbox_pred = self.net.get_output('bbox_pred')
+        #    bbox_targets = self.net.get_output('roi-data')[2]
+        #    bbox_inside_weights = self.net.get_output('roi-data')[3]
+        #    bbox_outside_weights = self.net.get_output('roi-data')[4]
+
+        #    smooth_l1 = self._modified_smooth_l1(1.0, bbox_pred, bbox_targets, bbox_inside_weights, bbox_outside_weights)
+        #    loss_box = tf.reduce_mean(tf.reduce_sum(smooth_l1, reduction_indices=[1]))
+
+
         # final loss
         loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
 
@@ -143,7 +172,7 @@ class SolverWrapper(object):
         pdb.set_trace()
         import pickle
 
-        #datadir = 'lib/tests/test_layer_frcnn_data/'
+        #datadir = 'data/pretrain_model/'
         #with open(datadir+'test_all.pkl', 'rb')  as fid:
         #    df = pickle.load( fid )
         #reshapein , rpn_rois , gt, \
@@ -226,13 +255,7 @@ class SolverWrapper(object):
             #    ], feed_dict=feed_dict, options=run_options, run_metadata=run_metadata)
             #pickle.dump( res , open('lib/tests/test_layer_frcnn_data/test_all.pkl', 'wb') )
 
-            #pdb.set_trace()
-
-            rpn_loss_cls_value, rpn_loss_box_value,loss_cls_value, loss_box_value, _ = sess.run([rpn_cross_entropy, rpn_loss_box, cross_entropy, loss_box, train_op],
-                                                                                                feed_dict=feed_dict,
-                                                                                                options=run_options,
-                                                                                                run_metadata=run_metadata)
-
+            rpn_loss_cls_value, rpn_loss_box_value, loss_cls_value, loss_box_value, _ = sess.run([rpn_cross_entropy, rpn_loss_box, cross_entropy, loss_box, train_op],feed_dict=feed_dict,options=run_options,run_metadata=run_metadata)
             timer.toc()
 
             if cfg.TRAIN.DEBUG_TIMELINE:

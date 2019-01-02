@@ -29,6 +29,19 @@ class VGGnet_train_wrapper(object):
             self.bbox_weights_assign = weights.assign(self.bbox_weights)
             self.bbox_bias_assign = biases.assign(self.bbox_biases)
 
+    def get_output(self, layer):
+        try:
+            layer = self.layers[layer]
+        except KeyError:
+            print self.layers.keys()
+            raise KeyError('Unknown layer name fed: %s'%layer)
+        return layer
+
+    def load(self, data_path, session, saver, ignore_missing=False):
+        if data_path.endswith('.ckpt'):
+            saver.restore(session, data_path)
+        else:
+            self.vggbk.restore_params(session, data_path)
 
     def setup(self):
         '''
@@ -48,56 +61,39 @@ class VGGnet_train_wrapper(object):
         cls_prob,bbox_pred, cross_entropy,loss_box
 
         '''
-        isTrain = self.trainable
 
-        #VGG backend
+	self.layers = {}
+        ##### backbone
         self.vggbk = VGG16BackBone(self.data)
         conv5_3 = self.vggbk.get_output()
 
-        #RPN
-        rpn_rois, rpn_cross_entro, rpn_loss_box = \
+        ##### RPN
+	rpn_rois, rpn_cross_entro, rpn_loss_box = \
                 RPN().create(
                         conv5_3,
                         self.im_info,
                         self.gt_boxes,
-                        isTrain = isTrain
+                        isTrain = self.trainable
                         ).get_outputs()
-        #FRCNN
+
+	self.layers['rpn_cross_entropy'] = rpn_cross_entro
+	self.layers['rpn_loss_box'] = rpn_loss_box
+
+	##### FRCNN
         self.frcnn = FRCNN().create(
                         conv5_3,
                         rpn_rois,
                         self.gt_boxes,
                         num_classes = n_classes,
-                        isTrain = isTrain
+                        isTrain = self.trainable
                         )
-        cls_prob, bbox_pred, cross_entropy, loss_box = self.frcnn.get_outputs()
+	cls_prob, bbox_pred, cross_entropy, loss_box = self.frcnn.get_outputs()
 
 
-        self.outputs = {}
-        self.outputs['cls_prob'] = cls_prob
-        self.outputs['bbox_pred'] = bbox_pred
-        self.outputs['cross_entropy'] = cross_entropy
-        self.outputs['loss_box'] = loss_box
-        self.outputs['rpn_cross_entropy'] = rpn_cross_entro
-        self.outputs['rpn_loss_box'] = rpn_loss_box
+        self.layers['cls_score'] = tf.get_default_graph().get_tensor_by_name( 'cls_score/BiasAdd:0' )
+        self.layers['bbox_pred'] = bbox_pred
+        self.layers['cls_prob'] = cls_prob
 
-        self.outputs['rois'] = rpn_rois
-        self.outputs['cls_score'] = tf.get_default_graph().get_tensor_by_name( 'cls_score/BiasAdd:0' )
-
-
-    def get_output(self, key):
-
-        try:
-            res = self.outputs[key]
-        except:
-            raise ValueError("key does not exists")
-
-        return res
-
-    def load(self, data_path, session, saver, ignore_missing=False):
-        if data_path.endswith('.ckpt'):
-            saver.restore(session, data_path)
-        else:
-            self.vggbk.restore_params(session, data_path)
-            self.frcnn.restore_params(session, data_path)
-
+        self.layers['cross_entropy'] = cross_entropy
+        self.layers['loss_box'] = loss_box
+        self.layers['rois'] = rpn_rois
