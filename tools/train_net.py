@@ -86,9 +86,6 @@ if __name__ == '__main__':
 
     output_dir = get_output_dir(imdb, None)
     print 'Output will be saved to `{:s}`'.format(output_dir)
-    output_dir = bolt.ARTIFACT_DIR + '/' + '/'.join(output_dir.split('/')[-3::])
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
 
     device_name = '/{}:{:d}'.format(args.device,args.device_id)
     print device_name
