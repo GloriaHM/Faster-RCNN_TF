@@ -8,12 +8,14 @@ from utils.cython_bbox import bbox_overlaps
 
 class ROIDataLoader(object):
 
-    def __init__(self):
+    def __init__(self, imdb, num_classes):
         self._roidb = None
         self.bbox_means = None
         self.bbox_stds = None
+        self.imdb = imdb
+        self._num_classes = num_classes
 
-    def preprocess_train(self, imdb):
+    def preprocess_train(self):
         '''
         augment image
         add derived roi statistics
@@ -22,7 +24,7 @@ class ROIDataLoader(object):
 
         if cfg.TRAIN.USE_FLIPPED:
             print 'Appending horizontally-flipped training examples...'
-            imdb.append_flipped_images()
+            self.imdb.append_flipped_images()
             print 'done'
 
         #preprocessing
@@ -60,7 +62,7 @@ class ROIDataLoader(object):
 
             return roidb
 
-        roidb = prepare_roidb(imdb)
+        roidb = prepare_roidb(self.imdb)
 
         #filter roi db
         def filter_roidb(roidb):
@@ -189,15 +191,14 @@ class ROIDataLoader(object):
 
         self._roidb = roidb
 
-    def preprocess_test(self, imdb):
+    def preprocess_test(self ):
         '''
         '''
         pass
 
 
-    def init_sampler(self, num_classes):
+    def init_sampler(self ):
         """Set the roidb to be used by this layer during training."""
-        self._num_classes = num_classes
         self._shuffle_roidb_inds()
 
 
