@@ -8,7 +8,7 @@ import pickle
 
 from data_loader.data_loader import ROIDataLoader
 from models.factory import get_network
-from trainer_tester.train import Trainer
+from trainer_tester.train import SolverWrapper
 from fast_rcnn.config import cfg,cfg_from_file, cfg_from_list, get_output_dir
 
 class Test_train(unittest.TestCase):
@@ -50,7 +50,7 @@ class Test_train(unittest.TestCase):
                 if cfg.IS_MULTISCALE:
                     raise
                 else:
-                    layer = ROIDataLoader()
+                    layer = ROIDataLoader(imdb, imdb.num_classes)
             else:
                 raise
 
@@ -65,11 +65,9 @@ class Test_train(unittest.TestCase):
         saver = tf.train.Saver(max_to_keep=100)
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 
-            dataloader.preprocess_train(imdb)
+            dataloader.preprocess_train()
 
-            trainer = Trainer(sess, saver, network, dataloader, outputdir)
-
-
+            trainer = SolverWrapper(sess, saver, network, dataloader, outputdir)
 
 
 if __name__ == "__main__":
