@@ -8,9 +8,9 @@
 """Train a Fast R-CNN network."""
 
 from fast_rcnn.config import cfg
-import gt_data_layer.roidb as gdl_roidb
-import roi_data_layer.roidb as rdl_roidb
-from roi_data_layer.layer import RoIDataLayer
+#import gt_data_layer.roidb as gdl_roidb
+#import roi_data_layer.roidb as rdl_roidb
+#from roi_data_layer.layer import RoIDataLayer
 from utils.timer import Timer
 import numpy as np
 import os
@@ -18,22 +18,29 @@ import tensorflow as tf
 import sys
 from tensorflow.python.client import timeline
 import time
+from data_loader.data_loader import ROIDataLoader
 
-class Trainer(object):
+
+class SolverWrapper(object):
     """A simple wrapper around Caffe's solver.
     This wrapper gives us control over he snapshotting process, which we
     use to unnormalize the learned bounding-box regression weights.
     """
 
-    def __init__(self, sess, saver, network, data, output_dir, pretrained_model=None):
+    def __init__(self, sess, saver, network, dataloader, output_dir, pretrained_model=None,):
         """Initialize the SolverWrapper."""
         self.net = network
-        self.data = data
+        #self.imdb = imdb
+        #self.roidb = roidb
         self.output_dir = output_dir
         self.pretrained_model = pretrained_model
+        self.dataloader = dataloader
 
+        print 'Computing bounding-box regression targets...'
         if cfg.TRAIN.BBOX_REG:
-            self.bbox_means, self.bbox_stds = data.get_bbox_means_stds()
+            self.bbox_means, self.bbox_stds = dataloader.get_bbox_means_stds()
+            #self.bbox_means, self.bbox_stds = #rdl_roidb.add_bbox_regression_targets(roidb)
+        print 'done'
 
         # For checkpoint
         self.saver = saver
@@ -100,7 +107,9 @@ class Trainer(object):
     def train_model(self, sess, max_iters):
         """Network training loop."""
 
-        data_layer = get_data_layer(self.roidb, self.imdb.num_classes)
+        #data_layer = get_data_layer(self.roidb, self.imdb.num_classes)
+        data_layer = self.dataloader
+        data_layer.init_sampler()
 
         # RPN
         # classification loss
@@ -138,7 +147,7 @@ class Trainer(object):
         timer = Timer()
         for iter in range(max_iters):
             # get one batch
-            blobs = data_layer.forward()
+            blobs = data_layer.get_next_batch()
 
             # Make one SGD update
             feed_dict={self.net.data: blobs['data'], self.net.im_info: blobs['im_info'], self.net.keep_prob: 0.5, \
@@ -172,13 +181,3 @@ class Trainer(object):
 
         if last_snapshot_iter != iter:
             self.snapshot(sess, iter)
-
-def train_net(network, imdb, roidb, output_dir, pretrained_model=None, max_iters=40000):
-    """Train a Fast R-CNN network."""
-    roidb = filter_roidb(roidb)
-    saver = tf.train.Saver(max_to_keep=100)
-    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-        sw = SolverWrapper(sess, saver, network, imdb, roidb, output_dir, pretrained_model=pretrained_model)
-        print 'Solving...'
-        sw.train_model(sess, max_iters)
-        print 'done solving'
