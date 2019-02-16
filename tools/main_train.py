@@ -13,7 +13,7 @@ import _init_paths
 from fast_rcnn.config import cfg,cfg_from_file, cfg_from_list, get_output_dir
 #from trainer_tester.train import train_net
 from datasets.factory import get_imdb
-from networks.factory import get_network
+from models.factory import get_network
 from data_loader.data_loader import ROIDataLoader
 from trainer_tester.train import SolverWrapper
 

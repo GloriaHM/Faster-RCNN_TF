@@ -10,7 +10,7 @@ import heapq
 from utils.blob import im_list_to_blob
 import os
 import math
-from rpn_msr.generate import imdb_proposals_det
+#from rpn_msr.generate import imdb_proposals_det
 import tensorflow as tf
 from fast_rcnn.bbox_transform import clip_boxes, bbox_transform_inv
 import matplotlib.pyplot as plt

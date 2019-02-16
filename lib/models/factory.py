@@ -12,6 +12,8 @@ __sets = {}
 import models.VGGnet_train_wrapper
 import pdb
 import tensorflow as tf
+import roi_pooling_layer.roi_pooling_op as roi_pool_op
+import roi_pooling_layer.roi_pooling_op_grad
 
 #__sets['VGGnet_train'] = networks.VGGnet_train()
 
