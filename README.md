@@ -8,7 +8,7 @@ For details about R-CNN please refer to the paper [Faster R-CNN: Towards Real-Ti
 
 1. Requirements for Tensorflow (see: [Tensorflow](https://www.tensorflow.org/))
 
-2. Python packages you might not have: `cython`, `python-opencv`, `easydict`
+2. Python packages you might not have: `cython`, `python-opencv`, `easydict`, `tensorlayer`
 
 ### Requirements: hardware
 
@@ -76,17 +76,23 @@ The demo performs detection using a VGG16 network trained for detection on PASCA
     
 5. Download pre-trained ImageNet models
 
-   Download the pre-trained ImageNet models [[Google Drive]](https://drive.google.com/open?id=0ByuDEGFYmWsbNVF5eExySUtMZmM) [[Dropbox]](https://www.dropbox.com/s/po2kzdhdgl4ix55/VGG_imagenet.npy?dl=0)
+   Download the pre-trained ImageNet models (https://github.com/tensorlayer/pretrained-models/blob/master/models/vgg16_weights.npz)
    
    	```Shell
-    mv VGG_imagenet.npy $FRCN_ROOT/data/pretrain_model/VGG_imagenet.npy
+    mv vgg16_weights.npz $FRCN_ROOT/data/pretrain_model/vgg16_weights.npz
     ```
 
 6. Run script to train and test model
-	```Shell
-	cd $FRCN_ROOT
-	./experiments/scripts/faster_rcnn_end2end.sh $DEVICE $DEVICE_ID VGG16 pascal_voc
-	```
+	#```Shell
+	#cd $FRCN_ROOT
+	#./experiments/scripts/faster_rcnn_end2end.sh $DEVICE $DEVICE_ID VGG16 pascal_voc
+	#```
+  Train code
+  python ./tools/main_train.py --device DEVICE --device_id 0   --weights data/pretrain_model/vgg16_weights.npz  --imdb voc_2007_trainval   --iters 70000   --cfg experiments/cfgs/faster_rcnn_end2end.yml   --network VGGnet_train
+
+  Test code
+  python ./tools/main_test.py --device DEVICE --device_id 0 --weights weights_file --cfg experiments/cfgs/faster_rcnn_end2end.yml --imdb voc_2007_test --network VGGnet_test
+  
   DEVICE is either cpu/gpu
 
 ### The result of testing on PASCAL VOC 2007 
